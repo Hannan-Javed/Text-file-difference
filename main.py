@@ -1,8 +1,16 @@
 import os, sys, difflib
 
+def displayInTerminal(left_text,right_text):
+
+    for i in range(max(len(left_text),len(right_text))):
+        if i>len(left_text):
+            print("Text file 2 line "+str(i+1)+": "+right_text[i])
+        elif i>len(right_text):
+            print("Text file 1 line "+str(i+1)+": "+left_text[i])
+        else:
+            print("Text file 1 line "+str(i+1)+": "+left_text[i]+"\nText file 2 line "+str(i+1)+": "+right_text[i])
+
 def main():
-    terminal_width = os.get_terminal_size().columns
-    half_width = terminal_width // 2
     text_files = [file for file in os.listdir(os.getcwd()) if file.endswith(".txt")]
     if len(text_files)==0 or len(text_files)==1:
         print("Fewer than 2 text files present")
@@ -18,7 +26,6 @@ def main():
         file2 = int(input("Input number of second text file: "))
     
     text1 = open(text_files[file1-1],'r').read().splitlines()
-    
     text2 = open(text_files[file2-1],'r').read().splitlines()
     differ = difflib.Differ()
     
@@ -40,11 +47,10 @@ def main():
             continue
 
         diff = differ.compare(text1[0],text2[0])
-
+        
         left_line = ''
         right_line = ''
         for char in diff:
-            
             if char[0] == '-':
                 left_line = left_line + "\033[91m" + char[2] + "\033[0m"
             elif char[0] == '+':
@@ -52,21 +58,11 @@ def main():
             else:
                 left_line = left_line + char[2]
                 right_line = right_line + char[2]
+
         left_text.append(left_line)
         right_text.append(right_line)
         text1.pop(0)
         text2.pop(0)
-        if len(text1) == 0:
-            right_text.append(text2)
-            
-        if len(text2) == 0:
-            left_text.append(text1)
-    for i in range(max(len(left_text),len(right_text))):
-        if i>len(left_text):
-            print(right_text[i])
-        elif i>len(right_text):
-            print(left_text[i])
-        else:
-            print(left_text[i],right_text[i])
+    displayInTerminal(left_text,right_text)
 
 main()
