@@ -1,7 +1,13 @@
 import os, sys, difflib
+import tkinter as tk
+
+red_color = "\033[91m"
+green_color = "\033[92m"
 
 def displayInTerminal(left_text,right_text):
 
+    left_text = getTerminalString(left_text,red_color)
+    right_text = getTerminalString(right_text, green_color)
     for i in range(max(len(left_text),len(right_text))):
         if i>len(left_text):
             print("Text file 2 line "+str(i+1)+": "+right_text[i])
@@ -10,7 +16,78 @@ def displayInTerminal(left_text,right_text):
         else:
             print("Text file 1 line "+str(i+1)+": "+left_text[i]+"\nText file 2 line "+str(i+1)+": "+right_text[i])
 
+def getTerminalString(text, color):
+
+    t_string = []
+    for line in text:
+        final_string = ''
+        for char,tag in line:
+            if tag != '':
+                final_string += color + char + "\033[0m"
+            else:
+                final_string += char
+        t_string.append(final_string)
+
+    return t_string
+
+def displayInWindow(left_text,right_text):
+
+    window = tk.Tk()
+
+    # Set the initial size of the window
+    initial_width = 800
+    initial_height = 600
+    window.geometry(f"{initial_width}x{initial_height}")
+
+    # Set the minimum size of the window to the initial size
+    window.wm_minsize(initial_width, initial_height)
+    
+    # Create a frame to hold the text boxes
+    frame = tk.Frame(window)
+    frame.pack(fill=tk.BOTH, expand=True)
+
+    left_text_box = tk.Text(frame, width=50, height=20)
+    left_text_box.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+    right_text_box = tk.Text(frame, width=50, height=20)
+    right_text_box.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
+
+    # Define the color tags
+    left_text_box.tag_configure("red", foreground="red")
+    left_text_box.tag_configure("green", foreground="green")
+    
+    right_text_box.tag_configure("red", foreground="red")
+    right_text_box.tag_configure("green", foreground="green")
+
+    # Update the text in the text boxes with colors
+    for line in left_text:
+        for char, tag in line:
+            if tag:
+                left_text_box.insert(tk.END, char, tag)
+            else:
+                left_text_box.insert(tk.END, char)
+        left_text_box.insert(tk.END, "\n")
+
+    for line in right_text:
+        for char, tag in line:
+            if tag:
+                right_text_box.insert(tk.END, char, tag)
+            else:
+                right_text_box.insert(tk.END, char)
+        right_text_box.insert(tk.END, "\n")
+
+    # Allow the text boxes to resize with the window
+    window.rowconfigure(0, weight=1)
+    window.columnconfigure(0, weight=1)
+    frame.rowconfigure(0, weight=1)
+    frame.columnconfigure(0, weight=1)
+    frame.columnconfigure(1, weight=1)
+
+    # Start the GUI event loop
+    window.mainloop()
+
 def main():
+
     text_files = [file for file in os.listdir(os.getcwd()) if file.endswith(".txt")]
     if len(text_files)==0 or len(text_files)==1:
         print("Fewer than 2 text files present")
@@ -35,34 +112,38 @@ def main():
     while len(text1)>0 and len(text2)>0:
         
         if text1[0]=='' and text2[0]!='':
-            left_text.append("\033[91m" + "<newline>" + "\033[0m")
-            right_text.append('')
+            left_text.append([("<newline>", "red")])
+            right_text.append([("", "")])
             text1.pop(0)
             continue
         
         if text2[0]=='' and text1[0]!='':
-            right_text.append("\033[92m" + "<newline>" + "\033[0m")
-            left_text.append('')
+            right_text.append([("<newline>", "green")])
+            left_text.append([("", "")])
             text2.pop(0)
             continue
 
         diff = differ.compare(text1[0],text2[0])
-        
-        left_line = ''
-        right_line = ''
+
+        left_line = []
+        right_line = []
         for char in diff:
             if char[0] == '-':
-                left_line = left_line + "\033[91m" + char[2] + "\033[0m"
+                left_line.append((char[2], "red"))
+                right_line.append(("", ""))
             elif char[0] == '+':
-                right_line = right_line + "\033[92m" + char[2] + "\033[0m"
+                right_line.append((char[2], "green"))
+                left_line.append(("", ""))
             else:
-                left_line = left_line + char[2]
-                right_line = right_line + char[2]
+                left_line.append((char[2], ""))
+                right_line.append((char[2], ""))
 
         left_text.append(left_line)
         right_text.append(right_line)
         text1.pop(0)
         text2.pop(0)
+
     displayInTerminal(left_text,right_text)
+    displayInWindow(left_text,right_text)
 
 main()
