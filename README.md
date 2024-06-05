@@ -1,5 +1,5 @@
 # Text File Difference
-This program outputs the difference in any two text files in the current working directory with color coding. It uses the <span style="color:lightblue;">difflib</span> library.
+This program outputs the difference in any two text files in the current working directory with color coding. It uses the <span style="color:#ADD8E6;">difflib</span> library.
 The output is displayed both in the terminal of the program and in a new window.
 ## Run
 Running the program is quite simple, just simply run the main.py file.
